@@ -30,6 +30,9 @@ Set these in the **backend** service (Railway → Variables).
 | `EMAIL_HOST_PASSWORD` | For contact form | App password / SMTP password |
 | `DEFAULT_FROM_EMAIL` | Recommended | Usually same as `EMAIL_HOST_USER` |
 | `CONTACT_RECIPIENT_EMAIL` | Optional | Inbox that receives inquiries |
+| `DJANGO_SUPERUSER_EMAIL` | Optional | With `DJANGO_SUPERUSER_PASSWORD`, creates the **first** Django admin on deploy (`python manage.py ensure_superuser`). Ignored if any superuser already exists. |
+| `DJANGO_SUPERUSER_PASSWORD` | Optional | Strong password for that admin (store only in Railway Variables). |
+| `DJANGO_SUPERUSER_USERNAME` | Optional | Defaults to the email if omitted. |
 
 **Railway-specific (optional):**
 
@@ -39,11 +42,13 @@ Set these in the **backend** service (Railway → Variables).
 
 After the first deploy, run migrations if needed (the **Procfile** / `railway.toml` start command runs `migrate` automatically).
 
-**Create superuser** (one-off): Railway → backend service → **Shell**:
+**Admin user:** Set `DJANGO_SUPERUSER_EMAIL` and `DJANGO_SUPERUSER_PASSWORD` in Variables; each deploy runs `ensure_superuser` and creates an admin **only if no superuser exists yet**. Or run manually in **Shell**: `python manage.py createsuperuser`.
 
-```bash
-python manage.py createsuperuser
-```
+### Public URL not showing (backend)
+
+1. Latest deploy must be **successful** (migrate + gunicorn running). Check **Deployments → Logs** for errors.
+2. **Settings → Networking → Public networking** → generate a domain. **Target port** must match the port the app listens on. This project binds to **`${PORT:-8080}`** — Railway usually sets **`PORT`** (often `8080`). Use that value.
+3. Smoke test: open `https://<your-backend-host>/api/health/` — you should see `{"ok": true}`.
 
 ## 3. Frontend environment variables
 

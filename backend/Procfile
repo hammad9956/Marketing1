@@ -1,1 +1,1 @@
-web: python manage.py migrate --noinput && gunicorn helix_backend.wsgi:application --bind 0.0.0.0:$PORT
+web: sh -c 'python manage.py migrate --noinput && python manage.py ensure_superuser && exec gunicorn helix_backend.wsgi:application --bind 0.0.0.0:${PORT:-8080}'
