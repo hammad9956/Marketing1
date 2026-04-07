@@ -2,7 +2,7 @@ import json
 import logging
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage, send_mail
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -63,16 +63,48 @@ def contact_submit(request):
         f"Message:\n{inquiry.message}\n"
     )
     recipient = settings.CONTACT_RECIPIENT_EMAIL
+    visitor_email = inquiry.email.strip().lower()
+    team_inbox = recipient.strip().lower()
 
     if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
         try:
-            send_mail(
-                subject,
-                body,
-                settings.DEFAULT_FROM_EMAIL,
-                [recipient],
-                fail_silently=False,
+            # Team notification — Reply-To so you can hit “Reply” and reach the visitor.
+            internal = EmailMessage(
+                subject=subject,
+                body=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[recipient],
+                reply_to=[inquiry.email],
             )
+            internal.send(fail_silently=False)
+
+            # Confirmation to the person who submitted (skip if same inbox as team to avoid duplicate).
+            if visitor_email != team_inbox:
+                confirm_subject = "We received your message — Helix Prime Solutions"
+                confirm_body = (
+                    f"Hi {inquiry.name},\n\n"
+                    "Thank you for contacting Helix Prime Solutions. "
+                    "We have received your inquiry and will get back to you shortly.\n\n"
+                    "A copy of your message is below for your records.\n\n"
+                    "—\n"
+                    f"{inquiry.message}\n"
+                    "—\n\n"
+                    "Best regards,\n"
+                    "Helix Prime Solutions\n"
+                )
+                try:
+                    send_mail(
+                        confirm_subject,
+                        confirm_body,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [inquiry.email],
+                        fail_silently=False,
+                    )
+                except Exception:
+                    logger.exception(
+                        "Confirmation email to %s failed (inquiry saved; team email was sent)",
+                        inquiry.email,
+                    )
         except Exception as exc:
             logger.exception("Failed to send inquiry email")
             err_payload = {

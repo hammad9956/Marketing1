@@ -70,16 +70,17 @@ Optional: social links, Tawk, etc. — see `frontend/.env.example`.
 The form **always saves** the row in Django (`Inquiry`). Mail is separate.
 
 1. **Backend must have** `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` set (Gmail: use an [App Password](https://support.google.com/accounts/answer/185833), not your normal login password).
-2. **`CONTACT_RECIPIENT_EMAIL`** is the inbox that receives copies (defaults to `EMAIL_HOST_USER` if unset).
-3. From the backend shell (local or Railway **Shell**), run:
+2. **`CONTACT_RECIPIENT_EMAIL`** is the team inbox that receives each inquiry. The submitter also gets a **confirmation email** at the address they typed, unless it is the same address as the team inbox (to avoid duplicate mail to `info@…`).
+3. The team email includes **Reply-To** set to the visitor’s address so you can reply from your mail client in one step.
+4. From the backend shell (local or Railway **Shell**), run:
 
    ```bash
    python manage.py test_contact_email
    ```
 
    If this fails, fix SMTP variables before testing the website again. If it succeeds but you see nothing, check **spam** and the recipient address.
-4. **Browser shows “Network error or timeout”** — the browser never reached Django (wrong `NEXT_PUBLIC_API_URL`, CORS, or backend down). That is not an SMTP problem.
-5. **Browser shows “We could not send your message…”** — Django ran but `send_mail` failed (bad password, blocked port, etc.). With `DJANGO_DEBUG=true`, the JSON response may include `smtp_error` in development.
+5. **Browser shows “Network error or timeout”** — the browser never reached Django (wrong `NEXT_PUBLIC_API_URL`, CORS, or backend down). That is not an SMTP problem.
+6. **Browser shows “We could not send your message…”** — Django ran but `send_mail` failed (bad password, blocked port, etc.). With `DJANGO_DEBUG=true`, the JSON response may include `smtp_error` in development.
 
 ## 6. Custom domains
 
