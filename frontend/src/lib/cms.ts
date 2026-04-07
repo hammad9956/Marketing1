@@ -16,6 +16,13 @@ function cmsFetchTimeoutMs(): number {
   return Number.isFinite(n) && n > 0 ? Math.min(n, 30000) : 8000;
 }
 
+/** In development, skip Next fetch cache so Django Admin edits show on refresh. Override with CMS_FETCH_CACHE=1. */
+function cmsFetchUsesNoStore(): boolean {
+  if (process.env.CMS_FETCH_NO_CACHE === "1") return true;
+  if (process.env.CMS_FETCH_CACHE === "1") return false;
+  return process.env.NODE_ENV === "development";
+}
+
 /**
  * CMS requests with a hard timeout so SSR does not hang when Django is slow or down
  * (falls back to static content instead of a long blank page).
@@ -28,11 +35,14 @@ async function cmsFetch(
   const ctrl = new AbortController();
   const id = setTimeout(() => ctrl.abort(), ms);
   const { next, ...rest } = init ?? {};
+  const noStore = cmsFetchUsesNoStore();
   try {
     return await fetch(url, {
       ...rest,
       signal: ctrl.signal,
-      next: next ?? { revalidate: 60 },
+      ...(noStore
+        ? { cache: "no-store" as const }
+        : { next: next ?? { revalidate: 60 } }),
     });
   } finally {
     clearTimeout(id);

@@ -76,13 +76,16 @@ function useCountUp(
   return value;
 }
 
+const statCardClass =
+  "relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b122e] p-6 shadow-lg shadow-black/30";
+
 function TextStatBlock({ stat }: { stat: CmsStat }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-md dark:border-white/10 dark:bg-white/[0.06] dark:shadow-lg dark:shadow-black/20">
+    <div className={statCardClass}>
       <p className="font-display text-3xl font-bold tabular-nums tracking-tight text-brand sm:text-4xl">
         {stat.value}
       </p>
-      <p className="mt-3 text-base leading-snug text-slate-600 dark:text-slate-400">
+      <p className="mt-3 text-base leading-snug text-slate-300">
         {stat.label}
       </p>
     </div>
@@ -114,7 +117,7 @@ function NumericStatBlock({
     parsed.decimals > 0 ? n.toFixed(parsed.decimals) : String(Math.round(n));
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-md dark:border-white/10 dark:bg-white/[0.06] dark:shadow-lg dark:shadow-black/20">
+    <div className={statCardClass}>
       <div className="absolute right-5 top-5 flex gap-1" aria-hidden>
         {[0, 1, 2].map((dot) => (
           <span key={dot} className="h-1.5 w-1.5 rounded-full bg-brand" />
@@ -127,7 +130,7 @@ function NumericStatBlock({
           {parsed.suffix === "x" ? "X" : parsed.suffix}
         </span>
       </p>
-      <p className="mt-3 text-base leading-snug text-slate-600 dark:text-slate-400">
+      <p className="mt-3 text-base leading-snug text-slate-300">
         {stat.label}
       </p>
     </div>
@@ -179,7 +182,7 @@ export function ImpactStatsSection({ stats }: Props) {
                 Numbers That Actually Matter
               </h2>
               <p className="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-                Key metrics from your CMS home settings—no sample figures.
+                These figures are whatever you save under CMS → Home — Impact stats in Django Admin.
               </p>
             </div>
           </div>

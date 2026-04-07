@@ -26,8 +26,8 @@ export default async function BlogsPage() {
               Blog
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-              Search by title, then open an article for the full story. New posts are managed in
-              Django Admin → Blog posts.
+              Search by title, then open an article for the full story. Titles and excerpts come from
+              CMS → Blog posts in Django Admin.
             </p>
           </Reveal>
         </div>

@@ -4,7 +4,6 @@ import { BlogPreviewSection } from "@/components/BlogPreviewSection";
 import { CmsImage } from "@/components/CmsImage";
 import { ContactForm } from "@/components/ContactForm";
 import { FinalCtaSection } from "@/components/FinalCtaSection";
-import { GlassPillarsSection } from "@/components/GlassPillarsSection";
 import { HomeShowcasesSection } from "@/components/HomeShowcasesSection";
 import { ImpactStatsSection } from "@/components/ImpactStatsSection";
 import { Reveal } from "@/components/Reveal";
@@ -23,7 +22,7 @@ export default async function HomePage() {
     fetchBlogsList(),
     fetchAbout(),
   ]);
-  const { services, testimonials, hero, stats, pillars, showcases } = home;
+  const { services, testimonials, hero, stats, showcases } = home;
   const featured = projects.slice(0, 3);
   const envHero = process.env.NEXT_PUBLIC_HERO_BACKGROUND?.trim();
   const heroBackground =
@@ -115,8 +114,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      <GlassPillarsSection pillars={pillars} />
 
       <ImpactStatsSection stats={stats} />
 

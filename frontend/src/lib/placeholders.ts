@@ -34,6 +34,3 @@ export function unsplashForSeed(seed: string): string {
 export const PLACEHOLDER_HERO = unsplashAt(0);
 export const PLACEHOLDER_ABOUT_HERO = unsplashAt(2);
 export const PLACEHOLDER_SHOWCASE = (i: number) => unsplashAt(i + 4);
-
-/** Blurred workspace background for home pillar cards */
-export const PILLARS_SECTION_BG = unsplashAt(5);

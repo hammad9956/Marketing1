@@ -9,6 +9,7 @@ python -m venv .venv
 pip install -r requirements.txt
 copy .env.example .env
 python manage.py migrate
+python manage.py seed_cms
 python manage.py runserver
 
 Admin: http://127.0.0.1:8000/admin/
