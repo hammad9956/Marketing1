@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,14 +69,36 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "helix_backend.wsgi.application"
 
-# Railway / Postgres: set DATABASE_URL (recommended). Falls back to SQLite for local dev.
-_sqlite_url = f"sqlite:///{(BASE_DIR / 'db.sqlite3').as_posix()}"
-DATABASES = {
-    "default": dj_database_url.config(
-        default=_sqlite_url,
-        conn_max_age=600,
-    )
-}
+# Railway / Postgres: non-empty DATABASE_URL from linked PostgreSQL. Empty or broken URLs
+# (e.g. manual override to blank) yield Postgres config without NAME and crash migrate.
+_database_url = os.environ.get("DATABASE_URL", "").strip()
+_on_railway = bool(os.environ.get("RAILWAY_ENVIRONMENT"))
+
+if not _database_url:
+    if _on_railway:
+        raise ImproperlyConfigured(
+            "DATABASE_URL is missing or empty. On Railway: create a PostgreSQL service, "
+            "link it to this backend service (Variables → add reference to Postgres "
+            "DATABASE_URL), and remove any blank DATABASE_URL override."
+        )
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        },
+    }
+else:
+    _db = dj_database_url.parse(_database_url, conn_max_age=600)
+    _engine = str(_db.get("ENGINE", ""))
+    _opts = _db.get("OPTIONS") or {}
+    _pg_name = (_db.get("NAME") or "").strip() or _opts.get("service")
+    if "postgresql" in _engine and not _pg_name:
+        raise ImproperlyConfigured(
+            "DATABASE_URL is set but PostgreSQL has no database name (and no OPTIONS['service']). "
+            "Use the full connection string from Railway’s Postgres plugin (includes /railway or "
+            "similar path), or fix a malformed DATABASE_URL."
+        )
+    DATABASES = {"default": _db}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
