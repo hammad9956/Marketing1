@@ -3,7 +3,8 @@
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+# collectstatic does not need Postgres; build-time DATABASE_URL may omit the DB name.
+buildCommand = "pip install -r requirements.txt && DJANGO_COLLECTSTATIC_BUILD=1 python manage.py collectstatic --noinput"
 
 [deploy]
 startCommand = "python manage.py migrate --noinput && gunicorn helix_backend.wsgi:application --bind 0.0.0.0:$PORT"

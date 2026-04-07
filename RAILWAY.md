@@ -16,7 +16,7 @@ Set these in the **backend** service (Railway → Variables).
 
 | Variable | Required | Example / notes |
 |----------|----------|-----------------|
-| `DATABASE_URL` | Yes (production) | Injected when Postgres is **linked** to this service. Do **not** add an empty `DATABASE_URL` variable (it overrides the reference and breaks migrate with “supply the NAME”). Use **Variables → Reference** → `${{Postgres.DATABASE_URL}}` (name may vary). |
+| `DATABASE_URL` | Yes (production) | Injected when Postgres is **linked** to this service. Do **not** add an empty `DATABASE_URL` variable (it overrides the reference and breaks migrate with “supply the NAME”). Use **Variables → Reference** → `${{Postgres.DATABASE_URL}}` (name may vary). The image **build** runs `collectstatic` with `DJANGO_COLLECTSTATIC_BUILD=1` so a partial URL during build does not need a database name; **runtime** still requires a full URL for `migrate`. |
 | `DJANGO_SECRET_KEY` | Yes | Long random string (50+ chars). |
 | `DJANGO_DEBUG` | Yes | `false` in production. |
 | `DJANGO_ALLOWED_HOSTS` | Yes | Your backend hostname(s), comma-separated, **no** `https://`. Example: `your-api.up.railway.app` |

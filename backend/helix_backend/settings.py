@@ -69,12 +69,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "helix_backend.wsgi.application"
 
+# Docker/Railway build runs collectstatic before deploy; DATABASE_URL may be missing a DB
+# name at build time. This flag is set only in backend/railway.toml for that step.
+_collectstatic_build = os.environ.get("DJANGO_COLLECTSTATIC_BUILD", "").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+
 # Railway / Postgres: non-empty DATABASE_URL from linked PostgreSQL. Empty or broken URLs
 # (e.g. manual override to blank) yield Postgres config without NAME and crash migrate.
 _database_url = os.environ.get("DATABASE_URL", "").strip()
 _on_railway = bool(os.environ.get("RAILWAY_ENVIRONMENT"))
 
-if not _database_url:
+if _collectstatic_build:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        },
+    }
+elif not _database_url:
     if _on_railway:
         raise ImproperlyConfigured(
             "DATABASE_URL is missing or empty. On Railway: create a PostgreSQL service, "
@@ -96,7 +111,8 @@ else:
         raise ImproperlyConfigured(
             "DATABASE_URL is set but PostgreSQL has no database name (and no OPTIONS['service']). "
             "Use the full connection string from Railway’s Postgres plugin (includes /railway or "
-            "similar path), or fix a malformed DATABASE_URL."
+            "similar path), or fix a malformed DATABASE_URL. "
+            "(Build-time collectstatic uses DJANGO_COLLECTSTATIC_BUILD=1 — see backend/railway.toml.)"
         )
     DATABASES = {"default": _db}
 
