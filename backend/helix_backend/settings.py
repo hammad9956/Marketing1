@@ -108,11 +108,12 @@ else:
     _opts = _db.get("OPTIONS") or {}
     _pg_name = (_db.get("NAME") or "").strip() or _opts.get("service")
     if "postgresql" in _engine and not _pg_name:
-        raise ImproperlyConfigured(
-            "DATABASE_URL is set but PostgreSQL has no database name (and no OPTIONS['service']). "
-            "Use the full connection string from Railway’s Postgres plugin (includes /railway or "
-            "similar path), or fix a malformed DATABASE_URL. "
-            "(Build-time collectstatic uses DJANGO_COLLECTSTATIC_BUILD=1 — see backend/railway.toml.)"
+        # Railway sometimes exposes URLs without a path segment; linked Postgres also sets
+        # PGDATABASE. The platform default database name is usually "railway".
+        _db["NAME"] = (
+            os.environ.get("PGDATABASE", "").strip()
+            or os.environ.get("DJANGO_POSTGRES_DEFAULT_DB", "").strip()
+            or "railway"
         )
     DATABASES = {"default": _db}
 
