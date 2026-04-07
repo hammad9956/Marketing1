@@ -11,3 +11,6 @@ buildCommand = "NPM_CONFIG_PRODUCTION=false npm install --no-audit --no-fund && 
 [deploy]
 # `exec` + explicit port: Railway injects PORT; npm would show SIGTERM as npm error on deploy stop.
 startCommand = "sh -c 'exec next start -H 0.0.0.0 -p ${PORT:-8080}'"
+# `/` SSR waits on Django; use this path so health checks do not depend on the API.
+healthcheckPath = "/health"
+healthcheckTimeout = 60

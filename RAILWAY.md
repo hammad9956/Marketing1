@@ -73,6 +73,8 @@ Optional: social links, Tawk, etc. — see `frontend/.env.example`.
 
 **Frontend logs: `npm error signal SIGTERM` / `command sh -c next start`:** Usually **normal** — Railway sends **SIGTERM** when **replacing** the container (new deploy) or stopping the service. It is not necessarily an app crash. If the site **never** loads, check **Networking** target port matches **`PORT`** (often **8080**) and that the latest deploy **succeeded**. This repo starts with `exec next start -H 0.0.0.0 -p $PORT` so the server binds correctly without going through `npm start` on Railway.
 
+**Next.js “Ready” then “Stopping Container” a few seconds later:** The home page **`/`** server-renders and **fetches Django**. If the health probe hits **`/`** while the API is slow or down, the check can fail. `frontend/railway.toml` sets **`healthcheckPath = "/health"`** (a static JSON route that does **not** call CMS). In the Railway UI, if you override the health check, point it to **`/health`** (or clear overrides so config-as-code applies).
+
 ### Postgres “connection refused” to `*.railway.internal`
 
 That host is Railway’s **private** network. Refused usually means:
