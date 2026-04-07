@@ -3,9 +3,9 @@ import logging
 
 from django.conf import settings
 from django.core.mail import EmailMessage, send_mail
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import require_http_methods
 
 from .models import Inquiry
 
@@ -14,9 +14,11 @@ logger = logging.getLogger(__name__)
 MAX_MESSAGE = 8000
 
 
-@require_GET
+@require_http_methods(["GET", "HEAD"])
 def health(request):
     """Lightweight probe for Railway / load balancers (no DB hit)."""
+    if request.method == "HEAD":
+        return HttpResponse()
     return JsonResponse({"ok": True})
 
 

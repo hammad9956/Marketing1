@@ -22,9 +22,17 @@ ALLOWED_HOSTS = [
     for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if h.strip()
 ]
-# Railway default hostname pattern (*.up.railway.app) when deploying there.
-if os.environ.get("RAILWAY_ENVIRONMENT") and ".up.railway.app" not in " ".join(ALLOWED_HOSTS):
-    ALLOWED_HOSTS.append(".up.railway.app")
+# Railway hostnames vary: *.up.railway.app, *.railway.app, and internal *.railway.internal.
+if os.environ.get("RAILWAY_ENVIRONMENT"):
+    _hosts_blob = " ".join(ALLOWED_HOSTS)
+    for _suffix in (".up.railway.app", ".railway.app", ".railway.internal"):
+        if _suffix not in _hosts_blob:
+            ALLOWED_HOSTS.append(_suffix)
+            _hosts_blob = " ".join(ALLOWED_HOSTS)
+    for _key in ("RAILWAY_PUBLIC_DOMAIN", "RAILWAY_PRIVATE_DOMAIN"):
+        _h = os.environ.get(_key, "").strip()
+        if _h and _h not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(_h)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
