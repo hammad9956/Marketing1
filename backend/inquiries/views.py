@@ -1,6 +1,8 @@
 import json
 import logging
 import threading
+import urllib.error
+import urllib.request
 
 from django.conf import settings
 from django.core.mail import EmailMessage, send_mail
@@ -13,6 +15,54 @@ from .models import Inquiry
 logger = logging.getLogger(__name__)
 
 MAX_MESSAGE = 8000
+
+
+def _resend_is_configured() -> bool:
+    return bool(
+        (getattr(settings, "RESEND_API_KEY", "") or "").strip()
+        and (getattr(settings, "RESEND_FROM_EMAIL", "") or "").strip()
+    )
+
+
+def _send_resend_email(
+    *,
+    to_email: str,
+    subject: str,
+    text_body: str,
+    reply_to: str | None = None,
+) -> None:
+    payload: dict[str, object] = {
+        "from": settings.RESEND_FROM_EMAIL,
+        "to": [to_email],
+        "subject": subject,
+        "text": text_body,
+    }
+    if reply_to:
+        payload["reply_to"] = reply_to
+
+    req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as res:
+            status = getattr(res, "status", 200)
+            if int(status) >= 300:
+                raise RuntimeError(f"Resend returned status {status}")
+    except urllib.error.HTTPError as exc:
+        body = ""
+        try:
+            body = exc.read().decode("utf-8", errors="ignore")[:500]
+        except Exception:
+            pass
+        raise RuntimeError(f"Resend HTTP {exc.code}: {body}") from exc
+    except Exception as exc:
+        raise RuntimeError(f"Resend request failed: {exc}") from exc
 
 
 def _send_confirmation_email(inquiry: Inquiry) -> None:
@@ -30,13 +80,20 @@ def _send_confirmation_email(inquiry: Inquiry) -> None:
             "Best regards,\n"
             "Helix Prime Solutions\n"
         )
-        send_mail(
-            confirm_subject,
-            confirm_body,
-            settings.DEFAULT_FROM_EMAIL,
-            [inquiry.email],
-            fail_silently=False,
-        )
+        if _resend_is_configured():
+            _send_resend_email(
+                to_email=inquiry.email,
+                subject=confirm_subject,
+                text_body=confirm_body,
+            )
+        else:
+            send_mail(
+                confirm_subject,
+                confirm_body,
+                settings.DEFAULT_FROM_EMAIL,
+                [inquiry.email],
+                fail_silently=False,
+            )
     except Exception:
         logger.exception(
             "Confirmation email failed for inquiry id=%s", inquiry.id
@@ -91,9 +148,12 @@ def contact_submit(request):
     )
 
     recipient = settings.CONTACT_RECIPIENT_EMAIL
-    if not (settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD and recipient):
+    has_resend = _resend_is_configured()
+    has_smtp = bool(settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD)
+    if not recipient or (not has_resend and not has_smtp):
         logger.warning(
-            "Email not configured (EMAIL_HOST_USER/PASSWORD or CONTACT_RECIPIENT_EMAIL missing)."
+            "Email not configured. Set CONTACT_RECIPIENT_EMAIL plus either "
+            "RESEND_API_KEY/RESEND_FROM_EMAIL or SMTP settings."
         )
         return JsonResponse(
             {
@@ -114,14 +174,22 @@ def contact_submit(request):
     )
     try:
         # Send team email in-request for reliability.
-        internal = EmailMessage(
-            subject=subject,
-            body=body,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[recipient],
-            reply_to=[inquiry.email],
-        )
-        internal.send(fail_silently=False)
+        if has_resend:
+            _send_resend_email(
+                to_email=recipient,
+                subject=subject,
+                text_body=body,
+                reply_to=inquiry.email,
+            )
+        else:
+            internal = EmailMessage(
+                subject=subject,
+                body=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[recipient],
+                reply_to=[inquiry.email],
+            )
+            internal.send(fail_silently=False)
     except Exception:
         logger.exception("Team inquiry email failed for inquiry id=%s", inquiry.id)
         return JsonResponse(

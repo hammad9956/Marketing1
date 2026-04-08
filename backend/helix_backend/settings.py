@@ -318,6 +318,11 @@ CONTACT_RECIPIENT_EMAIL = (
     or "info@helixprimesolutions.com"
 )
 
+# Resend (HTTP API) — preferred on Railway when SMTP egress is unreliable.
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
+# Must be a verified sender/domain in Resend dashboard, e.g. "Helix <no-reply@yourdomain.com>"
+RESEND_FROM_EMAIL = os.environ.get("RESEND_FROM_EMAIL", "").strip()
+
 # Quiet runserver: hide routine "GET … 200" lines. Set DJANGO_VERBOSE_HTTP=1 to see every request.
 _DJANGO_VERBOSE_HTTP = os.environ.get("DJANGO_VERBOSE_HTTP", "").lower() in (
     "1",
