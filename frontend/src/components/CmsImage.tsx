@@ -1,5 +1,16 @@
 import Image from "next/image";
 
+/** If the API returns a root-relative /media/... URL, load it from the Django origin. */
+function resolveCmsSrc(src: string): string {
+  const s = src.trim();
+  if (/^https?:\/\//i.test(s)) return s;
+  if (s.startsWith("/")) {
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
+    if (base) return `${base}${s}`;
+  }
+  return s;
+}
+
 type Props = {
   src: string | null | undefined;
   alt: string;
@@ -23,19 +34,22 @@ export function CmsImage({
 }: Props) {
   if (!src) return null;
 
+  const resolved = resolveCmsSrc(src);
+
   if (fill) {
     return (
       <Image
-        src={src}
+        src={resolved}
         alt={alt}
         fill
         className={className}
         sizes={sizes}
         priority={priority}
         unoptimized={
-          src.includes("127.0.0.1") ||
-          src.includes("localhost") ||
-          src.includes("images.unsplash.com")
+          resolved.includes("127.0.0.1") ||
+          resolved.includes("localhost") ||
+          resolved.includes("images.unsplash.com") ||
+          resolved.includes("res.cloudinary.com")
         }
       />
     );
@@ -43,16 +57,17 @@ export function CmsImage({
 
   return (
     <Image
-      src={src}
+      src={resolved}
       alt={alt}
       width={width}
       height={height}
       className={className}
       priority={priority}
       unoptimized={
-        src.includes("127.0.0.1") ||
-        src.includes("localhost") ||
-        src.includes("images.unsplash.com")
+        resolved.includes("127.0.0.1") ||
+        resolved.includes("localhost") ||
+        resolved.includes("images.unsplash.com") ||
+        resolved.includes("res.cloudinary.com")
       }
     />
   );

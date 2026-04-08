@@ -202,9 +202,24 @@ if USE_CLOUDINARY_MEDIA:
     }
 
 # Public origin of this API (no path, no trailing slash), e.g. https://your-api.up.railway.app
-# Used for absolute /media/... URLs in JSON. Set when server-side CMS fetches use a private
-# hostname (Railway internal) so the browser still loads images from the public URL.
-DJANGO_PUBLIC_BASE_URL = os.environ.get("DJANGO_PUBLIC_BASE_URL", "").strip().rstrip("/")
+# Used for absolute /media/... URLs in JSON when Next.js calls the API via a private host
+# (Railway *.railway.internal) — request.build_absolute_uri() would otherwise point the
+# browser at an unreachable URL.
+def _django_public_base_url() -> str:
+    explicit = os.environ.get("DJANGO_PUBLIC_BASE_URL", "").strip().rstrip("/")
+    if explicit:
+        return explicit
+    # Railway sets this to the service's public hostname (no scheme), e.g. xxx.up.railway.app
+    rd = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip()
+    if not rd:
+        return ""
+    if rd.startswith(("http://", "https://")):
+        return rd.split("?")[0].rstrip("/")
+    host = rd.split("/")[0].replace("https://", "").replace("http://", "")
+    return f"https://{host}"
+
+
+DJANGO_PUBLIC_BASE_URL = _django_public_base_url()
 
 # Behind Railway / reverse proxies (HTTPS).
 if not DEBUG:

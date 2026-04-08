@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -18,12 +20,49 @@ from .models import (
 )
 
 
+def _rewrite_media_absolute_url(url: str) -> str:
+    """
+    When the API is called from SSR using an internal hostname, build_absolute_uri() can
+    produce http://*.railway.internal/... or http://127.0.0.1:8000/... — browsers cannot
+    load those. Rewrite /media/... to DJANGO_PUBLIC_BASE_URL when set.
+    """
+    base = (getattr(settings, "DJANGO_PUBLIC_BASE_URL", "") or "").strip().rstrip("/")
+    if not base or not url:
+        return url
+    if url.startswith(base):
+        return url
+    # Cloudinary and other CDNs are already public; do not rewrite.
+    if "res.cloudinary.com" in url:
+        return url
+    try:
+        p = urlparse(url)
+        if "/media/" not in (p.path or ""):
+            return url
+    except Exception:
+        return url
+    bad = (
+        "railway.internal",
+        "127.0.0.1",
+        "localhost",
+    )
+    if not any(b in url for b in bad):
+        return url
+    try:
+        p = urlparse(url)
+        suffix = p.path or ""
+        if p.query:
+            suffix = f"{suffix}?{p.query}"
+        return f"{base}{suffix}"
+    except Exception:
+        return url
+
+
 def _media_url(request, filefield):
     if not filefield or not getattr(filefield, "name", None):
         return None
     path = filefield.url
     if path.startswith(("http://", "https://")):
-        return path
+        return _rewrite_media_absolute_url(path)
     # MEDIA_URL may be "media/..." without a leading slash; joining with DJANGO_PUBLIC_BASE_URL
     # must not produce "https://hostmedia/..." (missing slash before /media/).
     if not path.startswith("/"):
@@ -31,7 +70,7 @@ def _media_url(request, filefield):
     base = getattr(settings, "DJANGO_PUBLIC_BASE_URL", "") or ""
     if base:
         return f"{base.rstrip('/')}{path}"
-    return request.build_absolute_uri(path)
+    return _rewrite_media_absolute_url(request.build_absolute_uri(path))
 
 
 def _service_dict(request, s: Service):
