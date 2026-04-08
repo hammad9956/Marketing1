@@ -19,7 +19,10 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() in ("1", "true", "yes")
 
 ALLOWED_HOSTS = [
     h.strip()
-    for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    for h in os.environ.get(
+        "DJANGO_ALLOWED_HOSTS",
+        "localhost,127.0.0.1,.railway.app,healthcheck.railway.app"
+    ).split(",")
     if h.strip()
 ]
 # Railway hostnames vary: *.up.railway.app, *.railway.app, and internal *.railway.internal.
@@ -33,6 +36,10 @@ if os.environ.get("RAILWAY_ENVIRONMENT"):
         _h = os.environ.get(_key, "").strip()
         if _h and _h not in ALLOWED_HOSTS:
             ALLOWED_HOSTS.append(_h)
+    # Platform health probes use this Host header; not the same as your public URL.
+    _railway_health = "healthcheck.railway.app"
+    if _railway_health not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_railway_health)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
