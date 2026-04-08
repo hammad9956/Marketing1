@@ -95,7 +95,7 @@ export function Navbar() {
         <Link href="/" prefetch={false} className="group relative z-10 flex min-w-0 items-center gap-2">
           <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-helix-bg shadow-lg shadow-brand/20 ring-1 ring-white/10 transition group-hover:shadow-brand/35">
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt=""
               width={36}
               height={36}

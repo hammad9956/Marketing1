@@ -42,13 +42,15 @@ export const metadata: Metadata = {
   description:
     "Helix Prime Solutions builds conversion-obsessed websites, dominates SEO, ships profit-driving apps, and provides elite staff augmentation—engineered for US businesses that want measurable revenue growth.",
   icons: {
-    icon: [{ url: "/logo.png", type: "image/png" }],
-    apple: [{ url: "/logo.png", type: "image/png" }],
+    icon: [{ url: "/logo.svg", type: "image/svg+xml", sizes: "any" }],
+    apple: [{ url: "/logo.svg", type: "image/svg+xml" }],
+    shortcut: "/logo.svg",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: COMPANY,
+    images: [{ url: "/logo.svg", width: 512, height: 512, alt: COMPANY }],
   },
   robots: { index: true, follow: true },
 };
