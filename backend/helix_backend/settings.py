@@ -162,14 +162,30 @@ USE_I18N = True
 USE_TZ = True
 
 
-def _use_cloudinary_media() -> bool:
-    """When True, CMS ImageFields use Cloudinary (credentials from env)."""
+def _cloudinary_credentials_ok() -> bool:
     if os.environ.get("CLOUDINARY_URL", "").strip():
         return True
     return all(
         os.environ.get(k, "").strip()
         for k in ("CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET")
     )
+
+
+def _use_cloudinary_media() -> bool:
+    """
+    CMS uploads use Cloudinary when credentials are set, or when DJANGO_USE_CLOUDINARY=1
+    (which requires credentials — avoids local /media/ disk on Railway).
+    """
+    want = os.environ.get("DJANGO_USE_CLOUDINARY", "").lower() in ("1", "true", "yes")
+    ok = _cloudinary_credentials_ok()
+    if want and not ok:
+        raise ImproperlyConfigured(
+            "DJANGO_USE_CLOUDINARY is enabled but Cloudinary credentials are missing. "
+            "Set CLOUDINARY_URL, or CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + "
+            "CLOUDINARY_API_SECRET. Dashboard: https://console.cloudinary.com/"
+        )
+    # Forced Cloudinary mode, or auto when credentials are present (no local /media/ uploads).
+    return True if want else ok
 
 
 USE_CLOUDINARY_MEDIA = _use_cloudinary_media()
