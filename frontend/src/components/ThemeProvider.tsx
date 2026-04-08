@@ -34,7 +34,7 @@ function persistTheme(t: ThemeMode) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>("light");
+  const [theme, setThemeState] = useState<ThemeMode>("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -45,10 +45,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         setThemeState(stored);
         applyClass(stored);
       } else {
-        applyClass("light");
+        setThemeState("dark");
+        applyClass("dark");
       }
     } catch {
-      applyClass("light");
+      setThemeState("dark");
+      applyClass("dark");
     }
   }, []);
 

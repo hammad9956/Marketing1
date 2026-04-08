@@ -7,7 +7,7 @@ import { getFooterSocialLinks } from "@/lib/footerSocial";
 import { COMPANY } from "@/lib/constants";
 import "./globals.css";
 
-const themeBootScript = `(function(){try{var t=localStorage.getItem('helix-theme');document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`;
+const themeBootScript = `(function(){try{var t=localStorage.getItem('helix-theme');document.documentElement.classList.toggle('dark',t!=='light');}catch(e){document.documentElement.classList.add('dark');}})();`;
 
 function metadataBaseUrl(): URL {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
@@ -63,7 +63,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dm.variable} ${syne.variable}`}
+      className={`dark ${dm.variable} ${syne.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen font-sans" suppressHydrationWarning>
