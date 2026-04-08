@@ -20,6 +20,7 @@ type Props = {
   fill?: boolean;
   sizes?: string;
   priority?: boolean;
+  quality?: number;
 };
 
 export function CmsImage({
@@ -31,6 +32,7 @@ export function CmsImage({
   fill,
   sizes,
   priority,
+  quality = 90,
 }: Props) {
   if (!src) return null;
 
@@ -45,11 +47,11 @@ export function CmsImage({
         className={className}
         sizes={sizes}
         priority={priority}
+        quality={quality}
         unoptimized={
           resolved.includes("127.0.0.1") ||
           resolved.includes("localhost") ||
-          resolved.includes("images.unsplash.com") ||
-          resolved.includes("res.cloudinary.com")
+          resolved.includes("images.unsplash.com")
         }
       />
     );
@@ -63,11 +65,11 @@ export function CmsImage({
       height={height}
       className={className}
       priority={priority}
+      quality={quality}
       unoptimized={
         resolved.includes("127.0.0.1") ||
         resolved.includes("localhost") ||
-        resolved.includes("images.unsplash.com") ||
-        resolved.includes("res.cloudinary.com")
+        resolved.includes("images.unsplash.com")
       }
     />
   );
