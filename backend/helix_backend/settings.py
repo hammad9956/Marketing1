@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -17,14 +18,40 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() in ("1", "true", "yes")
 
-ALLOWED_HOSTS = [
-    h.strip()
-    for h in os.environ.get(
-        "DJANGO_ALLOWED_HOSTS",
-        "localhost,127.0.0.1,.railway.app,healthcheck.railway.app,api.helixprimesolutions.com"
-    ).split(",")
-    if h.strip()
-]
+
+def _normalize_allowed_host(raw: str) -> str:
+    """
+    Accept host values in common env formats:
+    - api.example.com
+    - https://api.example.com/
+    - api.example.com:443
+    """
+    v = (raw or "").strip().rstrip("/")
+    if not v:
+        return ""
+    if v.startswith(("http://", "https://")):
+        try:
+            p = urlparse(v)
+            v = p.netloc or p.path or ""
+        except Exception:
+            return ""
+    # Drop any path accidentally included without scheme.
+    v = v.split("/")[0].strip()
+    # If host:port, keep only host for ALLOWED_HOSTS matching.
+    if ":" in v and not v.startswith("["):
+        v = v.split(":", 1)[0].strip()
+    return v
+
+
+_allowed_hosts_raw = os.environ.get(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1,.railway.app,healthcheck.railway.app,api.helixprimesolutions.com",
+)
+ALLOWED_HOSTS = []
+for _raw in _allowed_hosts_raw.split(","):
+    _h = _normalize_allowed_host(_raw)
+    if _h and _h not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_h)
 # Railway hostnames vary: *.up.railway.app, *.railway.app, and internal *.railway.internal.
 if os.environ.get("RAILWAY_ENVIRONMENT"):
     _hosts_blob = " ".join(ALLOWED_HOSTS)
@@ -33,7 +60,7 @@ if os.environ.get("RAILWAY_ENVIRONMENT"):
             ALLOWED_HOSTS.append(_suffix)
             _hosts_blob = " ".join(ALLOWED_HOSTS)
     for _key in ("RAILWAY_PUBLIC_DOMAIN", "RAILWAY_PRIVATE_DOMAIN"):
-        _h = os.environ.get(_key, "").strip()
+        _h = _normalize_allowed_host(os.environ.get(_key, ""))
         if _h and _h not in ALLOWED_HOSTS:
             ALLOWED_HOSTS.append(_h)
     # Platform health probes use this Host header; not the same as your public URL.
