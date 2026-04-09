@@ -183,30 +183,7 @@ PILLAR_SEEDS: list[dict[str, Any]] = [
     },
 ]
 
-SHOWCASE_SEEDS: list[dict[str, Any]] = [
-    {
-        "title": "Strategy and engineering, one accountable team",
-        "body": (
-            "Discovery is not a workshop deck-it is a prioritized roadmap with trade-offs, "
-            "timeline, and success metrics. Engineering follows the same thread: clean "
-            "architecture, performance budgets, and instrumentation so marketing and "
-            "product can iterate with confidence."
-        ),
-        "order": 0,
-        "image_on_right": False,
-    },
-    {
-        "title": "Operate with the discipline your P&L deserves",
-        "body": (
-            "We treat accessibility, security basics, and observability as part of "
-            "launch-not post-launch debt. That means fewer surprises in production, "
-            "cleaner handoffs to your internal team, and partners who can defend the "
-            "work in front of stakeholders."
-        ),
-        "order": 1,
-        "image_on_right": True,
-    },
-]
+SHOWCASE_SEEDS: list[dict[str, Any]] = []
 
 TESTIMONIAL_SEEDS: list[dict[str, Any]] = [
     {
