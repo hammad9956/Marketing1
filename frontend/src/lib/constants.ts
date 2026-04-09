@@ -6,6 +6,19 @@ export const OFFICE_ADDRESS =
 
 export const OFFICE_PHONE = process.env.NEXT_PUBLIC_OFFICE_PHONE?.trim() || "";
 
+/** Second public line — optional; shown as a separate link next to `OFFICE_PHONE`. */
+export const OFFICE_PHONE_2 = process.env.NEXT_PUBLIC_OFFICE_PHONE_2?.trim() || "";
+
+/** Office numbers with values set in env, first and second in order. */
+export function publicOfficePhones(): string[] {
+  return [OFFICE_PHONE, OFFICE_PHONE_2].filter((p) => p.length > 0);
+}
+
+/** `tel:` href for a display phone string (digits and leading + kept). */
+export function officePhoneTelHref(phone: string): string {
+  return `tel:${phone.replace(/[^\d+]/g, "")}`;
+}
+
 export const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@helixprimesolutions.com";
 

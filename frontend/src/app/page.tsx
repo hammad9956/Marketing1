@@ -13,8 +13,9 @@ import { WhyChooseSection } from "@/components/WhyChooseSection";
 import {
   COMPANY,
   OFFICE_ADDRESS,
-  OFFICE_PHONE,
+  officePhoneTelHref,
   publicContactEmails,
+  publicOfficePhones,
   SERVICE_SLUG_ORDER,
 } from "@/lib/constants";
 import {
@@ -373,27 +374,29 @@ export default async function HomePage() {
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-helix-border dark:bg-helix-elevated sm:p-8">
                 <p className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {OFFICE_ADDRESS || OFFICE_PHONE ? "Reach us directly" : "More ways to explore"}
+                  {OFFICE_ADDRESS || publicOfficePhones().length > 0
+                    ? "Reach us directly"
+                    : "More ways to explore"}
                 </p>
-                {OFFICE_ADDRESS || OFFICE_PHONE ? (
+                {OFFICE_ADDRESS || publicOfficePhones().length > 0 ? (
                   <ul className="mt-4 space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                     {OFFICE_ADDRESS ? (
                       <li className="whitespace-pre-line">{OFFICE_ADDRESS}</li>
                     ) : null}
-                    {OFFICE_PHONE ? (
-                      <li>
+                    {publicOfficePhones().map((phone) => (
+                      <li key={phone}>
                         <a
-                          href={`tel:${OFFICE_PHONE.replace(/[^\d+]/g, "")}`}
+                          href={officePhoneTelHref(phone)}
                           className="font-semibold text-brand hover:text-brand-hover"
                         >
-                          {OFFICE_PHONE}
+                          {phone}
                         </a>
                       </li>
-                    ) : null}
+                    ))}
                   </ul>
                 ) : null}
                 <ul
-                  className={`space-y-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400 ${OFFICE_ADDRESS || OFFICE_PHONE ? "mt-6 border-t border-slate-100 pt-6 dark:border-white/10" : "mt-4"}`}
+                  className={`space-y-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400 ${OFFICE_ADDRESS || publicOfficePhones().length > 0 ? "mt-6 border-t border-slate-100 pt-6 dark:border-white/10" : "mt-4"}`}
                 >
                   <li>
                     Browse{" "}

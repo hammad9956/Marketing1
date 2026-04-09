@@ -2,8 +2,9 @@ import Link from "next/link";
 import {
   COMPANY,
   OFFICE_ADDRESS,
-  OFFICE_PHONE,
+  officePhoneTelHref,
   publicContactEmails,
+  publicOfficePhones,
 } from "@/lib/constants";
 import type { FooterSocialLink, SocialPlatform } from "@/lib/footerSocial";
 
@@ -162,16 +163,13 @@ export function Footer({ socialLinks }: FooterProps) {
             {OFFICE_ADDRESS ? (
               <li className="leading-relaxed text-slate-400">{OFFICE_ADDRESS}</li>
             ) : null}
-            {OFFICE_PHONE ? (
-              <li>
-                <a
-                  href={`tel:${OFFICE_PHONE.replace(/[^\d+]/g, "")}`}
-                  className="transition hover:text-brand"
-                >
-                  {OFFICE_PHONE}
+            {publicOfficePhones().map((phone) => (
+              <li key={phone}>
+                <a href={officePhoneTelHref(phone)} className="transition hover:text-brand">
+                  {phone}
                 </a>
               </li>
-            ) : null}
+            ))}
             {publicContactEmails().map((email) => (
               <li key={email}>
                 <a href={`mailto:${email}`} className="transition hover:text-brand">

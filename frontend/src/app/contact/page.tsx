@@ -5,8 +5,9 @@ import { Reveal } from "@/components/Reveal";
 import {
   COMPANY,
   OFFICE_ADDRESS,
-  OFFICE_PHONE,
+  officePhoneTelHref,
   publicContactEmails,
+  publicOfficePhones,
 } from "@/lib/constants";
 import { fetchServicesList } from "@/lib/cms";
 
@@ -67,27 +68,29 @@ export default async function ContactPage() {
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-helix-border dark:bg-helix-surface/70">
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {OFFICE_ADDRESS || OFFICE_PHONE ? "Office & phone" : "Explore first"}
+                {OFFICE_ADDRESS || publicOfficePhones().length > 0
+                  ? "Office & phone"
+                  : "Explore first"}
               </p>
-              {OFFICE_ADDRESS || OFFICE_PHONE ? (
+              {OFFICE_ADDRESS || publicOfficePhones().length > 0 ? (
                 <ul className="mt-3 space-y-2 text-base text-slate-600 dark:text-slate-400 sm:text-lg">
                   {OFFICE_ADDRESS ? (
                     <li className="whitespace-pre-line leading-relaxed">{OFFICE_ADDRESS}</li>
                   ) : null}
-                  {OFFICE_PHONE ? (
-                    <li>
+                  {publicOfficePhones().map((phone) => (
+                    <li key={phone}>
                       <a
-                        href={`tel:${OFFICE_PHONE.replace(/[^\d+]/g, "")}`}
+                        href={officePhoneTelHref(phone)}
                         className="font-semibold text-brand hover:text-brand-hover"
                       >
-                        {OFFICE_PHONE}
+                        {phone}
                       </a>
                     </li>
-                  ) : null}
+                  ))}
                 </ul>
               ) : null}
               <p
-                className={`text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg ${OFFICE_ADDRESS || OFFICE_PHONE ? "mt-4 border-t border-slate-200 pt-4 dark:border-white/10" : "mt-3"}`}
+                className={`text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg ${OFFICE_ADDRESS || publicOfficePhones().length > 0 ? "mt-4 border-t border-slate-200 pt-4 dark:border-white/10" : "mt-3"}`}
               >
                 See{" "}
                 <Link href="/services" className="font-semibold text-brand hover:text-brand-hover">
