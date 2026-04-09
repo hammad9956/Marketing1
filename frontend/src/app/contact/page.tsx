@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ContactForm } from "@/components/ContactForm";
+import {
+  ContactMailIcon,
+  ContactMapPinIcon,
+  ContactPhoneIcon,
+} from "@/components/ContactInfoIcons";
 import { Reveal } from "@/components/Reveal";
 import {
   COMPANY,
@@ -43,12 +48,13 @@ export default async function ContactPage() {
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Email
               </p>
-              <ul className="mt-3 space-y-2">
+              <ul className="mt-3 space-y-3">
                 {publicContactEmails().map((email) => (
-                  <li key={email}>
+                  <li key={email} className="flex gap-3">
+                    <ContactMailIcon className="mt-1 h-5 w-5 shrink-0 text-slate-500 dark:text-slate-400" />
                     <a
                       href={`mailto:${email}`}
-                      className="block break-all text-lg font-medium text-brand hover:text-brand-hover dark:hover:text-brand"
+                      className="break-all text-lg font-medium text-brand hover:text-brand-hover dark:hover:text-brand"
                     >
                       {email}
                     </a>
@@ -73,12 +79,16 @@ export default async function ContactPage() {
                   : "Explore first"}
               </p>
               {OFFICE_ADDRESS || publicOfficePhones().length > 0 ? (
-                <ul className="mt-3 space-y-2 text-base text-slate-600 dark:text-slate-400 sm:text-lg">
+                <ul className="mt-3 space-y-3 text-base text-slate-600 dark:text-slate-400 sm:text-lg">
                   {OFFICE_ADDRESS ? (
-                    <li className="whitespace-pre-line leading-relaxed">{OFFICE_ADDRESS}</li>
+                    <li className="flex gap-3">
+                      <ContactMapPinIcon className="mt-1 h-5 w-5 shrink-0 text-slate-500 dark:text-slate-400" />
+                      <span className="whitespace-pre-line leading-relaxed">{OFFICE_ADDRESS}</span>
+                    </li>
                   ) : null}
                   {publicOfficePhones().map((phone) => (
-                    <li key={phone}>
+                    <li key={phone} className="flex gap-3">
+                      <ContactPhoneIcon className="mt-1 h-5 w-5 shrink-0 text-slate-500 dark:text-slate-400" />
                       <a
                         href={officePhoneTelHref(phone)}
                         className="font-semibold text-brand hover:text-brand-hover"

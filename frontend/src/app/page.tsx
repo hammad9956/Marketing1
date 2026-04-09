@@ -3,6 +3,11 @@ import { AboutHomeSection } from "@/components/AboutHomeSection";
 import { BlogPreviewSection } from "@/components/BlogPreviewSection";
 import { CmsImage } from "@/components/CmsImage";
 import { ContactForm } from "@/components/ContactForm";
+import {
+  ContactMailIcon,
+  ContactMapPinIcon,
+  ContactPhoneIcon,
+} from "@/components/ContactInfoIcons";
 import { FinalCtaSection } from "@/components/FinalCtaSection";
 import { HomeShowcasesSection } from "@/components/HomeShowcasesSection";
 import { ImpactStatsSection } from "@/components/ImpactStatsSection";
@@ -344,12 +349,13 @@ export default async function HomePage() {
                 <p className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Email
                 </p>
-                <ul className="mt-3 space-y-2">
+                <ul className="mt-3 space-y-3">
                   {publicContactEmails().map((email) => (
-                    <li key={email}>
+                    <li key={email} className="flex gap-3">
+                      <ContactMailIcon className="mt-1 h-5 w-5 shrink-0 text-slate-500 dark:text-slate-400" />
                       <a
                         href={`mailto:${email}`}
-                        className="block break-all text-xl font-medium text-brand hover:text-brand-hover"
+                        className="break-all text-xl font-medium text-brand hover:text-brand-hover"
                       >
                         {email}
                       </a>
@@ -381,10 +387,14 @@ export default async function HomePage() {
                 {OFFICE_ADDRESS || publicOfficePhones().length > 0 ? (
                   <ul className="mt-4 space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                     {OFFICE_ADDRESS ? (
-                      <li className="whitespace-pre-line">{OFFICE_ADDRESS}</li>
+                      <li className="flex gap-3">
+                        <ContactMapPinIcon className="mt-0.5 h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" />
+                        <span className="whitespace-pre-line">{OFFICE_ADDRESS}</span>
+                      </li>
                     ) : null}
                     {publicOfficePhones().map((phone) => (
-                      <li key={phone}>
+                      <li key={phone} className="flex gap-3">
+                        <ContactPhoneIcon className="mt-0.5 h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" />
                         <a
                           href={officePhoneTelHref(phone)}
                           className="font-semibold text-brand hover:text-brand-hover"

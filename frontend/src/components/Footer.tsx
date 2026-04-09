@@ -1,5 +1,10 @@
 import Link from "next/link";
 import {
+  ContactMailIcon,
+  ContactMapPinIcon,
+  ContactPhoneIcon,
+} from "@/components/ContactInfoIcons";
+import {
   COMPANY,
   OFFICE_ADDRESS,
   officePhoneTelHref,
@@ -161,18 +166,23 @@ export function Footer({ socialLinks }: FooterProps) {
           </p>
           <ul className="mt-4 space-y-3 text-sm text-slate-300">
             {OFFICE_ADDRESS ? (
-              <li className="leading-relaxed text-slate-400">{OFFICE_ADDRESS}</li>
+              <li className="flex gap-3 text-slate-400">
+                <ContactMapPinIcon className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                <span className="leading-relaxed">{OFFICE_ADDRESS}</span>
+              </li>
             ) : null}
             {publicOfficePhones().map((phone) => (
-              <li key={phone}>
+              <li key={phone} className="flex gap-3">
+                <ContactPhoneIcon className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
                 <a href={officePhoneTelHref(phone)} className="transition hover:text-brand">
                   {phone}
                 </a>
               </li>
             ))}
             {publicContactEmails().map((email) => (
-              <li key={email}>
-                <a href={`mailto:${email}`} className="transition hover:text-brand">
+              <li key={email} className="flex gap-3">
+                <ContactMailIcon className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                <a href={`mailto:${email}`} className="break-all transition hover:text-brand">
                   {email}
                 </a>
               </li>
