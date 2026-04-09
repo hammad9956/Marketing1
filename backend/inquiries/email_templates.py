@@ -127,12 +127,17 @@ def build_visitor_confirmation(inquiry: Inquiry) -> tuple[str, str]:
         f"Hi {first},\n\n"
         f"Thank you for contacting {COMPANY}. We received your inquiry and will "
         f"get back to you as soon as we can.\n\n"
-        f"Below is a copy of what you entered in the message field on our form "
-        f"(this is exactly what you typed — not an error):\n\n"
+        f"Copy of your submission (exactly as entered):\n"
         f"{'-' * 40}\n"
+        f"Name:  {inquiry.name}\n"
+        f"Email: {inquiry.email}\n"
+        f"Company: {inquiry.company or '—'}\n"
+        f"Phone: {inquiry.phone or '—'}\n"
+        f"Service interest: {inquiry.service or '—'}\n\n"
+        f"Project details / message:\n"
         f"{msg_plain}\n"
         f"{'-' * 40}\n\n"
-        f"If you need to add details, just reply to this email.\n\n"
+        f"If you need to add or correct anything, reply to this email.\n\n"
         f"Best regards,\n{COMPANY}\n"
         f"{_site_url()}\n"
     )
@@ -140,10 +145,15 @@ def build_visitor_confirmation(inquiry: Inquiry) -> tuple[str, str]:
         f"<p style=\"margin:0 0 16px;\">Hi <strong>{_e(first)}</strong>,</p>"
         f"<p style=\"margin:0 0 16px;\">Thank you for reaching out to <strong>{_e(COMPANY)}</strong>. "
         "We have received your inquiry and will respond as soon as we can.</p>"
-        "<p style=\"margin:0 0 8px;color:#64748b;font-size:14px;\">"
-        "<strong>Your message</strong> — the text below is what you submitted in the form. "
-        "It is included here for your records.</p>"
-        f"<div style=\"margin:16px 0;padding:16px 18px;background:#f8fafc;border-left:4px solid {_ACCENT};border-radius:0 8px 8px 0;font-size:15px;line-height:1.55;color:{_TEXT};\">{_nl2br(inquiry.message)}</div>"
+        "<p style=\"margin:0 0 12px;color:#64748b;font-size:14px;\">"
+        "<strong>Your submission</strong> — here is everything you entered on the form, for your records.</p>"
+        + _detail_row("Name", inquiry.name)
+        + _detail_row("Email", inquiry.email, is_email=True)
+        + _detail_row("Company", inquiry.company)
+        + _detail_row("Phone", inquiry.phone)
+        + _detail_row("Service interest", inquiry.service)
+        + "<p style=\"margin:20px 0 8px;font-size:13px;font-weight:600;color:#0f172a;text-transform:uppercase;letter-spacing:0.06em;\">Project details</p>"
+        f"<div style=\"margin:0;padding:16px 18px;background:#f8fafc;border-left:4px solid {_ACCENT};border-radius:0 8px 8px 0;font-size:15px;line-height:1.55;color:{_TEXT};\">{_nl2br(inquiry.message)}</div>"
         "<p style=\"margin:20px 0 0;\">If you would like to add anything, you can reply to this email.</p>"
         f"<p style=\"margin:20px 0 0;\">Best regards,<br><strong>{_e(COMPANY)}</strong></p>"
     )
